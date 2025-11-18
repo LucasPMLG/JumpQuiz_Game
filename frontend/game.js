@@ -27,6 +27,7 @@ function preload() {
   this.load.image('player', 'assets/sprites/player.png');
   this.load.image('pipe_yes', 'assets/sprites/pipe_green.png');
   this.load.image('pipe_no', 'assets/sprites/pipe_red.png');
+  this.load.image('player_supreme', 'assets/sprites/player_supreme.png');
 }
 
 
@@ -173,7 +174,11 @@ function updateBackground(score) {
 function resetBackground() {
   document.body.style.backgroundImage = '';  
 }
-
+function changePlayerImage() {
+  if (score >= 500) {
+      player.setTexture('player_supreme');
+  }
+}
 
 function submitAnswer(answer) {
   hideQuestionOverlay();
@@ -187,9 +192,12 @@ function submitAnswer(answer) {
     // award points and small animation (star)
     score += 100;
     updateBackground(score);
+    changePlayerImage();
     spawnStar();
   } else {
     // death screen (simple alert and reset score)
+     player.setTexture('player');
+     player.setVelocityY(-400);
      resetBackground();
     alert('RESPOSTADA ERRRRADA. Perdeu otário.');
     score = 0;
@@ -197,6 +205,8 @@ function submitAnswer(answer) {
   updateHud();
   currentQuestion = null;
 }
+
+
 
 function spawnStar() {
   const scene = game.scene.scenes[0];
