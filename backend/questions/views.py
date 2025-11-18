@@ -1,17 +1,49 @@
 import random
-from django.http import JsonResponse # type: ignore
-from django.views.decorators.http import require_GET, require_POST # type: ignore
-from django.views.decorators.csrf import csrf_exempt # type: ignore
-from .models import Question, Score
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
+from .models import Score
 
+# =============================================================
+#  LISTA FIXA DE PERGUNTAS (SEM BANCO)
+# =============================================================
+QUESTIONS = [
+    {"id": 1, "text": "Python é uma linguagem de programação?", "answer": True},
+    {"id": 2, "text": "HTML é uma linguagem de programação?", "answer": False},
+    {"id": 3, "text": "Python é uma linguagem de programação?", "answer": True},
+    {"id": 4, "text": "Python é uma linguagem de programação?", "answer": True},
+    {"id": 5, "text": "Python é uma linguagem de programação?", "answer": True},
+    {"id": 6, "text": "Python é uma linguagem de programação?", "answer": True},
+]
+
+# =============================================================
+#  RANDOM QUESTION (NÃO REPETE)
+# =============================================================
 @require_GET
 def random_question(request):
-    qs = Question.objects.all()
-    if not qs.exists():
-        return JsonResponse({'error': 'No questions seeded.'}, status=404)
-    q = random.choice(qs)
-    return JsonResponse({'id': q.id, 'text': q.text, 'answer': q.answer})
+    used = request.session.get("used_questions", [])
 
+    # perguntas que ainda não foram usadas
+    available = [q for q in QUESTIONS if q["id"] not in used]
+
+    # se acabou, reseta
+    if not available:
+        request.session["used_questions"] = []
+        used = []
+        available = QUESTIONS.copy()
+
+    # escolhe aleatória
+    q = random.choice(available)
+
+    # marca como usada
+    used.append(q["id"])
+    request.session["used_questions"] = used
+
+    return JsonResponse(q)
+
+# =============================================================
+#  SCORE SYSTEM
+# =============================================================
 @csrf_exempt
 @require_POST
 def submit_score(request):
@@ -28,35 +60,12 @@ def submit_score(request):
 @require_GET
 def top_scores(request):
     scores = Score.objects.order_by('-points')[:20]
-    data = [{'player_name': s.player_name, 'points': s.points, 'created_at': s.created_at.isoformat()} for s in scores]
+    data = [
+        {
+            'player_name': s.player_name,
+            'points': s.points,
+            'created_at': s.created_at.isoformat()
+        }
+        for s in scores
+    ]
     return JsonResponse({'scores': data})
-
-# Lista fixa de perguntas
-QUESTIONS = [
-    {"id": 1, "text": "O sol é uma estrela?", "answer": True},
-    {"id": 2, "text": "2 + 2 é igual a 5?", "answer": False},
-    {"id": 3, "text": "Python é uma linguagem de programação?", "answer": True},
-    {"id": 4, "text": "HTML é uma linguagem de programação?", "answer": False},
-]
-
-@require_GET
-def random_question(request):
-    used = request.session.get("used_questions", [])
-
-    # pega perguntas ainda não usadas
-    available = [q for q in QUESTIONS if q["id"] not in used]
-
-    # se acabou, reinicia
-    if not available:
-        request.session["used_questions"] = []
-        available = QUESTIONS.copy()
-        used = []
-
-    # escolhe aleatória
-    q = random.choice(available)
-
-    # salva pergunta usada
-    used.append(q["id"])
-    request.session["used_questions"] = used
-
-    return JsonResponse(q)

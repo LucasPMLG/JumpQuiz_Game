@@ -9,7 +9,7 @@ const config = {
    transparent: true,
   physics: {
     default: 'arcade',
-    arcade: { gravity: { y: 1000 }, debug: true, }
+    arcade: { gravity: { y: 1000 }, debug: false, }
 
   },
   scene: {
@@ -97,7 +97,6 @@ if ((cursors.up.isDown || cursors.space.isDown) && player.body.blocked.down) {
 }
 player.setRotation(0);
 player.angle = 0;
-  
 
   // simple collision with pipes selects answer
   if (asking && Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), yesPipe.getBounds())) {
@@ -106,7 +105,7 @@ player.angle = 0;
     submitAnswer(false);
   }
 
-  
+
 }
 
 function onHitBlock(playerObj, block) {
@@ -153,6 +152,29 @@ function hideQuestionOverlay() {
   if (el) el.remove();
 }
 
+function updateBackground(score) {
+  const backgrounds = [
+    { score: 100, url: 'https://i.pinimg.com/originals/08/d9/ef/08d9ef7723de602edefa8af825d9a1e2.gif' },
+    { score: 200, url: 'https://cdn.mos.cms.futurecdn.net/c7430b83771cb95dd5a6c49d593b4ec5.gif' },
+    { score: 300, url: 'https://64.media.tumblr.com/4cdadfc7dc8f0cf746d94d600e38fe90/4d234b7ecee6208d-dd/s1280x1920/debd221987a7eacf4da44ac875765374454d7623.gif' },
+    { score: 400, url: 'https://i.pinimg.com/originals/96/3f/49/963f4946cb59a181fc60fdca84ce9027.gif' },
+    { score: 500, url: 'https://cdn.wallpapersafari.com/30/0/n0HOqk.gif' },
+    { score: 600, url: 'https://cdn.wallpapersafari.com/43/20/AqS6Xm.gif' },
+    { score: 700, url: 'https://i.pinimg.com/originals/73/4f/b6/734fb6ed44aa280fe7546f7035363faf.gif' },
+    { score: 800, url: 'https://i.redd.it/x4hnwsvps4h91.gif' }
+  ];
+
+  for (let bg of backgrounds) {
+    if (score >= bg.score) {
+      document.body.style.backgroundImage = `url("${bg.url}")`;
+    }
+  }
+}
+function resetBackground() {
+  document.body.style.backgroundImage = '';  
+}
+
+
 function submitAnswer(answer) {
   hideQuestionOverlay();
   asking = false;
@@ -163,11 +185,13 @@ function submitAnswer(answer) {
   const correct = (answer === Boolean(currentQuestion.answer));
   if (correct) {
     // award points and small animation (star)
-    score += 10;
+    score += 100;
+    updateBackground(score);
     spawnStar();
   } else {
     // death screen (simple alert and reset score)
-    alert('Wrong answer! Game over.');
+     resetBackground();
+    alert('RESPOSTADA ERRRRADA. Perdeu otário.');
     score = 0;
   }
   updateHud();
@@ -176,10 +200,18 @@ function submitAnswer(answer) {
 
 function spawnStar() {
   const scene = game.scene.scenes[0];
-  const star = scene.physics.add.image(player.x, player.y - 40, 'star');
+  const star = scene.physics.add.image(player.x, player.y - 280, 'star');
   star.setVelocityY(-300);
   star.setGravityY(400);
-  setTimeout(() => star.destroy(), 1200);
+  star.setVelocityX(50);
+  scene.tweens.add({
+    targets: star,
+    alpha: 0,  
+    duration: 580,  
+    onComplete: () => {
+      star.destroy();  
+    }
+  });
 }
 
 function updateHud() {
