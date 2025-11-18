@@ -227,3 +227,4 @@ function spawnStar() {
 function updateHud() {
   hud.innerText = 'Score: ' + score;
 }
+
