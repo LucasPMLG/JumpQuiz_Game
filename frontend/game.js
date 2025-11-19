@@ -1,4 +1,5 @@
 // Minimal Phaser 3 game implementing JumpQuiz mechanics (question block, pipes yes/no)
+//Version 0.4
 const API_BASE = 'http://127.0.0.1:8000/api';  // assumes backend served on same host & port
 
 const config = {
@@ -9,7 +10,7 @@ const config = {
    transparent: true,
   physics: {
     default: 'arcade',
-    arcade: { gravity: { y: 1000 }, debug: false, }
+    arcade: { gravity: { y: 1000 }, debug: true, }
 
   },
   scene: {
@@ -25,8 +26,8 @@ function preload() {
   this.load.image('block', 'assets/sprites/block.png');
   this.load.image('star', 'assets/sprites/star.png');
   this.load.image('player', 'assets/sprites/player.png');
-  this.load.image('pipe_yes', 'assets/sprites/pipe_green.png');
-  this.load.image('pipe_no', 'assets/sprites/pipe_red.png');
+  this.load.image('pipe_yes', 'assets/sprites/ghost_yes.png');
+  this.load.image('pipe_no', 'assets/sprites/ghost_no.png');
   this.load.image('player_supreme', 'assets/sprites/player_supreme.png');
 }
 
@@ -51,8 +52,12 @@ function create() {
   questionBlock.setData('isQuestion', true);
 
   // pipes (hidden initially)
-  yesPipe = this.physics.add.staticSprite(300, 370, 'pipe_yes').setVisible(false);
-  noPipe = this.physics.add.staticSprite(500, 370, 'pipe_no').setVisible(false);
+  yesPipe = this.physics.add.staticSprite(200, 310, 'pipe_yes')
+  noPipe = this.physics.add.staticSprite(620, 310, 'pipe_no')
+  yesPipe.setAlpha(0);
+  noPipe.setAlpha(0);
+  yesPipe.setVisible(false);
+  noPipe.setVisible(false);
 
   // player
   player = this.physics.add.sprite(100, 500, 'player');
@@ -119,6 +124,10 @@ function onHitBlock(playerObj, block) {
     }
     currentQuestion = data;
     asking = true;
+
+    fadeInPipes(this);
+    showQuestionOverlay(currentQuestion.text);
+
     // show pipes and question overlay
     yesPipe.setVisible(true);
     noPipe.setVisible(true);
@@ -153,6 +162,29 @@ function hideQuestionOverlay() {
   if (el) el.remove();
 }
 
+function fadeInPipes(scene) {
+  yesPipe.setVisible(true);
+  noPipe.setVisible(true);
+
+  scene.tweens.add({
+    targets: yesPipe,
+    alpha: 1,
+    duration: 600,
+    ease: 'Power2'
+  });
+
+  scene.tweens.add({
+    targets: noPipe,
+    alpha: 1,
+    duration: 600,
+    ease: 'Power2',
+    delay: 200
+  });
+}
+
+
+
+
 function updateBackground(score) {
   const backgrounds = [
     { score: 100, url: 'https://i.pinimg.com/originals/08/d9/ef/08d9ef7723de602edefa8af825d9a1e2.gif' },
@@ -183,7 +215,10 @@ function changePlayerImage() {
 function submitAnswer(answer) {
   hideQuestionOverlay();
   asking = false;
+  yesPipe.setAlpha(0);
   yesPipe.setVisible(false);
+
+  noPipe.setAlpha(0);
   noPipe.setVisible(false);
 
   if (!currentQuestion) return;
