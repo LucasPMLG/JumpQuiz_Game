@@ -1,5 +1,5 @@
 // Minimal Phaser 3 game implementing JumpQuiz mechanics (question block, pipes yes/no)
-//Version 0.4
+//Version 0.4.1
 const API_BASE = 'http://127.0.0.1:8000/api';  // assumes backend served on same host & port
 
 const config = {
@@ -36,6 +36,7 @@ function preload() {
 let game = new Phaser.Game(config);
 let player, cursors, platforms, questionBlock, hud;
 let score = 0;
+let lastMilestone = 0;
 let asking = false;
 let currentQuestion = null;
 let yesPipe, noPipe;
@@ -86,6 +87,7 @@ function create() {
   hud = document.getElementById('hud');
   updateHud();
 
+  
 }
 
 function update(time, delta) {
@@ -136,7 +138,38 @@ function onHitBlock(playerObj, block) {
   });
 }
 
+function showLevelMessage() {
+  const msg = document.createElement('div');
+  msg.id = 'level-msg';
+  msg.style.position = 'absolute';
+  msg.style.left = '50%';
+  msg.style.top = '50%';
+  msg.style.transform = 'translate(-50%, -50%)';
+  msg.style.background = 'rgba(0,0,0,0.75)';
+  msg.style.color = 'white';
+  msg.style.padding = '20px 28px';
+  msg.style.borderRadius = '12px';
+  msg.style.fontSize = '22px';
+  msg.style.fontWeight = 'bold';
+  msg.style.zIndex = 9999;
+  msg.style.textAlign = 'center';
+  msg.innerText = "Parabéns, você alcançou uma nova fase!";
+
+  document.body.appendChild(msg);
+
+  // Remove após 3 segundos
+  setTimeout(() => {
+    msg.remove();
+  }, 3000);
+}
+
+
+
 function showQuestionOverlay(text) {
+
+  const old = document.getElementById('question-overlay');
+  if (old) old.remove();
+  
   const overlay = document.createElement('div');
   overlay.id = 'question-overlay';
   overlay.style.position = 'absolute';
@@ -151,9 +184,85 @@ function showQuestionOverlay(text) {
   overlay.style.textAlign = 'center';
   overlay.style.fontWeight = 'bold';
   overlay.style.zIndex = 999;
-  overlay.innerText = text + '\n\nJump into the GREEN pipe for YES, RED pipe for NO';
+  overlay.innerText = text + `\n Selecione o fantasma de \n Verdadeiro ou Falso para responder`;
   document.body.appendChild(overlay);
 }
+
+function showSpaceMessage(text) {
+  const msg = document.createElement('div');
+  msg.id = 'space-msg';
+  msg.style.position = 'absolute';
+  msg.style.left = '50%';
+  msg.style.top = '50%';
+  msg.style.transform = 'translate(-50%, -50%)';
+  msg.style.background = 'rgba(0,0,0,0.85)';
+  msg.style.color = 'white';
+  msg.style.padding = '20px 28px';
+  msg.style.borderRadius = '12px';
+  msg.style.fontSize = '22px';
+  msg.style.fontWeight = 'bold';
+  msg.style.zIndex = 9999;
+  msg.style.textAlign = 'center';
+  msg.innerText = text;
+
+  document.body.appendChild(msg);
+
+  // remove após 3,5 segundos
+  setTimeout(() => {
+    msg.remove();
+  }, 3500);
+}
+
+function showScoreMilestoneMessage() {
+  const msg = document.createElement('div');
+  msg.id = 'score-milestone-msg';
+  msg.style.position = 'absolute';
+  msg.style.left = '50%';
+  msg.style.top = '50%';
+  msg.style.transform = 'translate(-50%, -50%)';
+  msg.style.background = 'rgba(0,0,0,0.75)';
+  msg.style.color = 'white';
+  msg.style.padding = '20px 28px';
+  msg.style.borderRadius = '12px';
+  msg.style.fontSize = '22px';
+  msg.style.fontWeight = 'bold';
+  msg.style.zIndex = 9999;
+  msg.style.textAlign = 'center';
+  msg.innerText = "Parabéns, você atingiu 500 pontos!";
+
+  document.body.appendChild(msg);
+
+  // Remove após 3 segundos
+  setTimeout(() => {
+    msg.remove();
+  }, 2000);
+}
+
+function showTripCompletedMessage() {
+  const msg = document.createElement('div');
+  msg.id = 'trip-completed-msg';
+  msg.style.position = 'absolute';
+  msg.style.left = '50%';
+  msg.style.top = '50%';
+  msg.style.transform = 'translate(-50%, -50%)';
+  msg.style.background = 'rgba(0,0,0,0.85)';
+  msg.style.color = 'white';
+  msg.style.padding = '20px 28px';
+  msg.style.borderRadius = '12px';
+  msg.style.fontSize = '26px';
+  msg.style.fontWeight = 'bold';
+  msg.style.zIndex = 9999;
+  msg.style.textAlign = 'center';
+  msg.innerText = "🚀 Viagem concluída!";
+
+  document.body.appendChild(msg);
+
+  setTimeout(() => {
+    msg.remove();
+  }, 3500);
+}
+
+
 
 function hideQuestionOverlay() {
   const el = document.getElementById('question-overlay');
@@ -189,10 +298,10 @@ function updateBackground(score) {
     { score: 200, url: 'https://cdn.mos.cms.futurecdn.net/c7430b83771cb95dd5a6c49d593b4ec5.gif' },
     { score: 300, url: 'https://64.media.tumblr.com/4cdadfc7dc8f0cf746d94d600e38fe90/4d234b7ecee6208d-dd/s1280x1920/debd221987a7eacf4da44ac875765374454d7623.gif' },
     { score: 400, url: 'https://i.pinimg.com/originals/96/3f/49/963f4946cb59a181fc60fdca84ce9027.gif' },
-    { score: 500, url: 'https://cdn.wallpapersafari.com/30/0/n0HOqk.gif' },
-    { score: 600, url: 'https://cdn.wallpapersafari.com/43/20/AqS6Xm.gif' },
-    { score: 700, url: 'https://i.pinimg.com/originals/73/4f/b6/734fb6ed44aa280fe7546f7035363faf.gif' },
-    { score: 800, url: 'https://i.redd.it/x4hnwsvps4h91.gif' }
+    { score: 500, url: 'https://images3.alphacoders.com/807/807247.jpg' },
+    { score: 600, url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2wzODFidzBscGF5Y3l0ODlhZjM3cjBwbnluZ2hqdmU0OHYybW8yOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JyQNXZ6IovFFhO4biU/giphy.gif' },
+    { score: 700, url: 'https://i.pinimg.com/originals/ca/4d/23/ca4d2391455ade48053c0b6861842574.gif' },
+    { score: 800, url: 'https://i.pinimg.com/originals/bc/87/e5/bc87e5124f8d2cfe810d403adc96ad01.gif' }
   ];
 
   for (let bg of backgrounds) {
@@ -205,10 +314,20 @@ function resetBackground() {
   document.body.style.backgroundImage = '';  
 }
 function changePlayerImage() {
-  if (score >= 500) {
+  if (score == 500 ) {
       player.setTexture('player_supreme');
+      showScoreMilestoneMessage()
   }
 }
+function SpaceTrip() {
+  if (score >= 600 && !window.spaceMsgShown) {
+      window.spaceMsgShown = true; // evita repetir várias vezes
+      showSpaceMessage("🚀 Viajando para outra Galáxia! Conclusão da viagem em 700 pontos.");
+  }
+}
+
+
+
 
 function submitAnswer(answer) {
   hideQuestionOverlay();
@@ -220,13 +339,25 @@ function submitAnswer(answer) {
   noPipe.setVisible(false);
 
   if (!currentQuestion) return;
-  const correct = (answer === Boolean(currentQuestion.answer));
+  const correct = (answer == currentQuestion.answer);
   if (correct) {
     // award points and small animation (star)
     score += 100;
+
+    if (score >= lastMilestone + 100 && score !== 500 && score !== 600 && score !== 700) {
+        lastMilestone = score;
+        showLevelMessage();
+    }
+
     updateBackground(score);
     changePlayerImage();
+    SpaceTrip();
     spawnStar();
+
+     if (score >= 700 && !window.tripCompleted) {
+        window.tripCompleted = true;
+        showTripCompletedMessage();
+    }
   } else {
     // death screen (simple alert and reset score)
      player.setTexture('player');
