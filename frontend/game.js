@@ -10,7 +10,7 @@ const config = {
    transparent: true,
   physics: {
     default: 'arcade',
-    arcade: { gravity: { y: 1000 }, debug: true, }
+    arcade: { gravity: { y: 1000 }, debug: false, }
 
   },
   scene: {
@@ -129,9 +129,7 @@ function onHitBlock(playerObj, block) {
     showQuestionOverlay(currentQuestion.text);
 
     // show pipes and question overlay
-    yesPipe.setVisible(true);
-    noPipe.setVisible(true);
-    showQuestionOverlay(currentQuestion.text);
+    
   }).catch(err => {
     console.error(err);
     alert('Failed to fetch question from backend. Make sure backend is running and /api/random-question/ is available.');
