@@ -342,7 +342,7 @@ function submitAnswer(answer) {
   const correct = (answer == currentQuestion.answer);
   if (correct) {
     // award points and small animation (star)
-    score += 100;
+    score += 20;
 
     if (score >= lastMilestone + 100 && score !== 500 && score !== 600 && score !== 700) {
         lastMilestone = score;

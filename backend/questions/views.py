@@ -8,12 +8,11 @@ from .models import Score
 #  LISTA FIXA DE PERGUNTAS (SEM BANCO)
 # =============================================================
 QUESTIONS = [
-    {"id": 1, "text": "Python é uma linguagem de programação?", "answer": True},
-    {"id": 2, "text": "HTML é uma linguagem de programação?", "answer": False},
-    {"id": 3, "text": "Python é uma linguagem de programação?", "answer": True},
-    {"id": 4, "text": "Python é uma linguagem de programação?", "answer": True},
-    {"id": 5, "text": "Python é uma linguagem de programação?", "answer": True},
-    {"id": 6, "text": "Python é uma linguagem de programação?", "answer": True},
+    {"id": 1, "text": "A ITIL é um conjunto de boas práticas para gerenciamento de serviços de TI, não um framework prescritivo.", "answer": True},
+    {"id": 2, "text": "Problemas e incidentes têm significados diferentes no ITIL.", "answer": False},
+    {"id": 3, "text": "O objetivo principal do Gerenciamento de Incidentes é restaurar a operação normal do serviço o mais rápido possível.", "answer": True},
+    {"id": 4, "text": "O Gerenciamento de Problemas busca identificar causas raiz de incidentes e evitar recorrências.", "answer": True},
+    {"id": 5, "text": "O catálogo de serviços inclui serviços internos e externos, não apenas externos.", "answer": False},
 ]
 
 # =============================================================
