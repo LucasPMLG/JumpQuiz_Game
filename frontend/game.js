@@ -20,6 +20,11 @@ const config = {
   }
 };
 
+function updateHud() {
+  hud.innerText = 'Score: ' + score + ' | Vidas: ' + lives;
+}
+
+
 function preload() {
   this.load.image('bg', 'https://t4.ftcdn.net/jpg/09/11/68/91/360_F_911689184_UJ79OnnEaIz75Eo9bOXR6FuwwVL818gi.jpg');
   this.load.image('ground', 'assets/sprites/ground.png');
@@ -40,6 +45,8 @@ let lastMilestone = 0;
 let asking = false;
 let currentQuestion = null;
 let yesPipe, noPipe;
+let lives = 3;
+
 
 
 
@@ -359,12 +366,17 @@ function submitAnswer(answer) {
         showTripCompletedMessage();
     }
   } else {
-    // death screen (simple alert and reset score)
-     player.setTexture('player');
-     player.setVelocityY(-400);
-     resetBackground();
-    alert('RESPOSTADA ERRRRADA. Perdeu otário.');
-    score = 0;
+    lives--;
+
+    if (lives > 0) {
+        alert(`Resposta errada! Você perdeu uma vida. Vidas restantes: ${lives}`);
+    } else {
+        alert("GAME OVER! Você perdeu todas as vidas.");
+        lives = 3;      // reseta as vidas
+        score = 0;      // reseta o jogo
+        resetBackground();
+        player.setTexture('player'); // caso estivesse com player supremo
+    }
   }
   updateHud();
   currentQuestion = null;
@@ -388,7 +400,4 @@ function spawnStar() {
   });
 }
 
-function updateHud() {
-  hud.innerText = 'Score: ' + score;
-}
 
