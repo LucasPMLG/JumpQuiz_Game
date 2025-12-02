@@ -1,4 +1,5 @@
 import random
+import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -12,38 +13,44 @@ QUESTIONS = {
         {"id": 1, "text": "A ITIL é um conjunto de boas práticas.", "answer": True},
         {"id": 2, "text": "Problemas e incidentes são a mesma coisa.", "answer": False},
         {"id": 3, "text": "O objetivo principal do Gerenciamento de Incidentes é restaurar a operação normal do serviço o mais rápido possível.", "answer": True},
-        {"id": 4, "text": "O Service Value System (SVS) representa o modelo de criação de valor da ITIL v4.", "answer": True},
+        {"id": 4, "text": "Mudanças padrão são mudanças pré-autorizadas e de baixo risco.", "answer": True},
         {"id": 5, "text": "KPIs são usados para medir eficiência e desempenho.", "answer": True},
+        {"id": 6, "text": "O Gerenciamento de Liberação e Implantação visa entregar mudanças em produção de forma segura.", "answer": True},
     ],
 
     "medium": [
-        {"id": 6, "text": "O Gerenciamento de Problemas busca causa raiz.", "answer": True},
-        {"id": 7, "text": "O catálogo de serviços inclui apenas serviços externos.", "answer": False},
-        {"id": 8, "text": "O valor é co-criado entre provedor e consumidor na ITIL v4.", "answer": True},
-        {"id": 9, "text": "Na ITIL v4, práticas substituem os processos formalmente definidos do ITIL v3.", "answer": True},
-        {"id": 10, "text": "O Gerenciamento da Configuração mantém informações sobre ativos e itens de configuração.", "answer": True},
+        {"id": 7, "text": "O Gerenciamento de Problemas busca causa raiz.", "answer": True},
+        {"id": 8, "text": "O catálogo de serviços inclui apenas serviços externos.", "answer": False},
+        {"id": 9, "text": "O valor é co-criado entre provedor e consumidor na ITIL v4.", "answer": True},
+        {"id": 10, "text": "Na ITIL v4, práticas substituem os processos formalmente definidos do ITIL v3.", "answer": True},
+        {"id": 11, "text": "O Gerenciamento da Configuração mantém informações sobre ativos e itens de configuração.", "answer": True},
+        {"id": 12, "text": "O Service Value System (SVS) representa o modelo de criação de valor da ITIL v4.", "answer": True},
     ],
 
     "hard": [
-        {"id": 11, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
-        {"id": 12, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
-        {"id": 13, "text": "Na ITIL v4, o Service Desk é uma prática, não mais uma função.", "answer": False},
-        {"id": 14, "text": "Solicitação de serviço não é incidente; são tratadas separadamente (via Service Request Management).", "answer": False},
-        {"id": 15, "text": "O fluxo de incidentes é diferente do fluxo de problemas.", "answer": False},
+        {"id": 13, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
+        {"id": 14, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
+        {"id": 15, "text": "Na ITIL v4, o Service Desk é uma prática, não mais uma função.", "answer": False},
+        {"id": 16, "text": "Solicitação de serviço não é incidente; são tratadas separadamente (via Service Request Management).", "answer": False},
+        {"id": 17, "text": "O fluxo de incidentes é diferente do fluxo de problemas.", "answer": False},
     ]
 }
 
 # =============================================================
-#  CONTROLE GLOBAL (EVITA REPETIÇÃO)
+#  FILA EMBARALHADA (SEM REPETIÇÃO REAL)
 # =============================================================
-USED_QUESTIONS = {
-    "easy": set(),
-    "medium": set(),
-    "hard": set(),
+QUESTION_QUEUE = {
+    "easy": [],
+    "medium": [],
+    "hard": []
 }
 
+def refill_queue(difficulty):
+    QUESTION_QUEUE[difficulty] = QUESTIONS[difficulty].copy()
+    random.shuffle(QUESTION_QUEUE[difficulty])
+
 # =============================================================
-#  RANDOM QUESTION (SEM REPETIÇÃO)
+#  RANDOM QUESTION (SEM REPETIÇÃO REAL)
 # =============================================================
 @require_GET
 def random_question(request):
@@ -52,21 +59,15 @@ def random_question(request):
     if difficulty not in QUESTIONS:
         difficulty = "easy"
 
-    available = [
-        q for q in QUESTIONS[difficulty]
-        if q["id"] not in USED_QUESTIONS[difficulty]
-    ]
+    # Se a fila estiver vazia, reabastece e embaralha
+    if not QUESTION_QUEUE[difficulty]:
+        refill_queue(difficulty)
 
-    # Se acabaram as perguntas, reseta automaticamente
-    if not available:
-        USED_QUESTIONS[difficulty].clear()
-        available = QUESTIONS[difficulty].copy()
+    # Retira sempre a próxima da fila
+    question = QUESTION_QUEUE[difficulty].pop()
 
-    q = random.choice(available)
+    return JsonResponse(question)
 
-    USED_QUESTIONS[difficulty].add(q["id"])
-
-    return JsonResponse(q)
 
 # =============================================================
 #  SCORE SYSTEM
@@ -75,7 +76,6 @@ def random_question(request):
 @require_POST
 def submit_score(request):
     try:
-        import json
         data = json.loads(request.body)
 
         name = data.get('name', 'Player')
@@ -87,6 +87,7 @@ def submit_score(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
 
 # =============================================================
 #  TOP SCORES
