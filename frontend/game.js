@@ -36,6 +36,14 @@ function preload() {
   this.load.image('player_supreme', 'assets/sprites/player_supreme.png');
 }
 
+function getDifficulty() {
+  if (score < 200) return "easy";
+  if (score < 400) return "medium";
+  return "hard";
+}
+
+showAnimatedAlert("Bem vindo ao JUMP QUIZ!", 3400);
+
 
 
 let game = new Phaser.Game(config);
@@ -47,6 +55,13 @@ let currentQuestion = null;
 let yesPipe, noPipe;
 let lives = 3;
 
+function Tutorial20pontos() {
+  showAnimatedAlert("Parabéns, você acertou sua primeira questão, cada vez que acertar uma questão você ganhará pontos.", 3000);
+}
+
+function Tutorial60pontos() {
+  showAnimatedAlert("Sempre que conseguir 100 pontos, a dificuldade das perguntas aumentará!.", 3000);
+}
 
 
 
@@ -126,7 +141,8 @@ player.angle = 0;
 function onHitBlock(playerObj, block) {
   if (asking) return;
   // fetch question via API
-  fetch(API_BASE + '/random-question/').then(r => r.json()).then(data => {
+  const difficulty = getDifficulty();
+  fetch(API_BASE + `/random-question/?difficulty=${difficulty}`).then(r => r.json()).then(data => {
     if (data.error) {
       alert('No questions available in backend.');
       return;
@@ -144,6 +160,44 @@ function onHitBlock(playerObj, block) {
     alert('Failed to fetch question from backend. Make sure backend is running and /api/random-question/ is available.');
   });
 }
+
+function showAnimatedAlert(text, duration = 2500) {
+  const msg = document.createElement('div');
+  msg.style.position = 'fixed';
+  msg.style.left = '50%';
+  msg.style.top = '40%';
+  msg.style.transform = 'translate(-50%, -50%) scale(0.7)';
+  msg.style.opacity = '0';
+  msg.style.background = 'rgba(0, 0, 0, 0.9)';
+  msg.style.color = '#fff';
+  msg.style.padding = '16px 26px';
+  msg.style.borderRadius = '14px';
+  msg.style.fontSize = '20px';
+  msg.style.fontWeight = 'bold';
+  msg.style.zIndex = 99999;
+  msg.style.transition = 'all 0.35s ease';
+
+  msg.innerText = text;
+  document.body.appendChild(msg);
+
+  // anima entrada
+  setTimeout(() => {
+    msg.style.transform = 'translate(-50%, -50%) scale(1)';
+    msg.style.opacity = '1';
+  }, 50);
+
+  // anima saída
+  setTimeout(() => {
+    msg.style.transform = 'translate(-50%, -50%) scale(0.7)';
+    msg.style.opacity = '0';
+  }, duration);
+
+  // remove da tela
+  setTimeout(() => {
+    msg.remove();
+  }, duration + 400);
+}
+
 
 function showLevelMessage() {
   const msg = document.createElement('div');
@@ -351,6 +405,16 @@ function submitAnswer(answer) {
     // award points and small animation (star)
     score += 20;
 
+    if (score === 20) {
+    Tutorial20pontos();
+  }
+
+  if (score === 60) {
+    Tutorial60pontos();
+  }
+
+    
+
     if (score >= lastMilestone + 100 && score !== 500 && score !== 600 && score !== 700) {
         lastMilestone = score;
         showLevelMessage();
@@ -369,9 +433,9 @@ function submitAnswer(answer) {
     lives--;
 
     if (lives > 0) {
-        alert(`Resposta errada! Você perdeu uma vida. Vidas restantes: ${lives}`);
+        showAnimatedAlert(`Resposta errada! Você perdeu uma vida. Vidas restantes: ${lives}`, 3000);
     } else {
-        alert("GAME OVER! Você perdeu todas as vidas.");
+        showAnimatedAlert("GAME OVER! Você perdeu todas as vidas.", 3000);
         lives = 3;      // reseta as vidas
         score = 0;      // reseta o jogo
         resetBackground();

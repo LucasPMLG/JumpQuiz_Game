@@ -7,38 +7,53 @@ from .models import Score
 # =============================================================
 #  LISTA FIXA DE PERGUNTAS (SEM BANCO)
 # =============================================================
-QUESTIONS = [
-    {"id": 1, "text": "A ITIL é um conjunto de boas práticas para gerenciamento de serviços de TI, não um framework prescritivo.", "answer": True},
-    {"id": 2, "text": "Problemas e incidentes têm significados diferentes no ITIL.", "answer": False},
-    {"id": 3, "text": "O objetivo principal do Gerenciamento de Incidentes é restaurar a operação normal do serviço o mais rápido possível.", "answer": True},
-    {"id": 4, "text": "O Gerenciamento de Problemas busca identificar causas raiz de incidentes e evitar recorrências.", "answer": True},
-    {"id": 5, "text": "O catálogo de serviços inclui serviços internos e externos, não apenas externos.", "answer": False},
-]
+QUESTIONS = {
+    "easy": [
+        {"id": 1, "text": "A ITIL é um conjunto de boas práticas.", "answer": True},
+        {"id": 2, "text": "Problemas e incidentes são a mesma coisa.", "answer": False},
+        {"id": 3, "text": "O objetivo principal do Gerenciamento de Incidentes é restaurar a operação normal do serviço o mais rápido possível.", "answer": True},
+        {"id": 4, "text": "O Service Value System (SVS) representa o modelo de criação de valor da ITIL v4.", "answer": True},
+        {"id": 5, "text": "KPIs são usados para medir eficiência e desempenho.", "answer": True},
+    ],
+
+    "medium": [
+        {"id": 3, "text": "O Gerenciamento de Problemas busca causa raiz.", "answer": True},
+        {"id": 4, "text": "O catálogo de serviços inclui apenas serviços externos.", "answer": False},
+    ],
+
+    "hard": [
+        {"id": 5, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
+        {"id": 6, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
+    ]
+}
+
 
 # =============================================================
 #  RANDOM QUESTION (NÃO REPETE)
 # =============================================================
 @require_GET
 def random_question(request):
-    used = request.session.get("used_questions", [])
+    difficulty = request.GET.get("difficulty", "easy")
 
-    # perguntas que ainda não foram usadas
-    available = [q for q in QUESTIONS if q["id"] not in used]
+    if difficulty not in QUESTIONS:
+        difficulty = "easy"
 
-    # se acabou, reseta
+    used = request.session.get(f"used_{difficulty}", [])
+
+    available = [q for q in QUESTIONS[difficulty] if q["id"] not in used]
+
     if not available:
-        request.session["used_questions"] = []
+        request.session[f"used_{difficulty}"] = []
         used = []
-        available = QUESTIONS.copy()
+        available = QUESTIONS[difficulty].copy()
 
-    # escolhe aleatória
     q = random.choice(available)
 
-    # marca como usada
     used.append(q["id"])
-    request.session["used_questions"] = used
+    request.session[f"used_{difficulty}"] = used
 
     return JsonResponse(q)
+
 
 # =============================================================
 #  SCORE SYSTEM
