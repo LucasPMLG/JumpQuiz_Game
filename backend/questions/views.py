@@ -19,11 +19,17 @@ QUESTIONS = {
     "medium": [
         {"id": 6, "text": "O Gerenciamento de Problemas busca causa raiz.", "answer": True},
         {"id": 7, "text": "O catálogo de serviços inclui apenas serviços externos.", "answer": False},
+        {"id": 8, "text": "O valor é co-criado entre provedor e consumidor na ITIL v4.", "answer": True},
+        {"id": 9, "text": "Na ITIL v4, práticas substituem os processos formalmente definidos do ITIL v3.", "answer": True},
+        {"id": 10, "text": "O Gerenciamento da Configuração mantém informações sobre ativos e itens de configuração.", "answer": True},
     ],
 
     "hard": [
-        {"id": 8, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
-        {"id": 9, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
+        {"id": 11, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
+        {"id": 12, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
+        {"id": 13, "text": "Na ITIL v4, o Service Desk é uma prática, não mais uma função.", "answer": False},
+        {"id": 14, "text": "Solicitação de serviço não é incidente; são tratadas separadamente (via Service Request Management).", "answer": False},
+        {"id": 15, "text": "O fluxo de incidentes é diferente do fluxo de problemas.", "answer": False},
     ]
 }
 

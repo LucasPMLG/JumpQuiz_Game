@@ -42,7 +42,7 @@ function getDifficulty() {
   return "hard";
 }
 
-showAnimatedAlert("Bem vindo ao JUMP QUIZ!", 3400);
+showAnimatedAlertTitle("Bem vindo ao JUMP QUIZ!", 3400);
 
 
 
@@ -56,7 +56,7 @@ let yesPipe, noPipe;
 let lives = 3;
 
 function Tutorial20pontos() {
-  showAnimatedAlert("Parabéns, você acertou sua primeira questão, cada vez que acertar uma questão você ganhará pontos.", 3000);
+  showAnimatedAlert("Parabéns, você acertou sua primeira questão, cada vez que acertar uma questão você ganhará pontos.", 4800);
 }
 
 function Tutorial60pontos() {
@@ -197,6 +197,47 @@ function showAnimatedAlert(text, duration = 2500) {
     msg.remove();
   }, duration + 400);
 }
+
+function showAnimatedAlertTitle(text, duration = 2700) {
+  const msg = document.createElement('div');
+  msg.style.position = 'fixed';
+  msg.style.left = '50%';
+  msg.style.top = '40%';
+  msg.style.transform = 'translate(-50%, -50%) scale(0.7)';
+  msg.style.opacity = '0';
+  msg.style.background = 'rgba(29, 80, 245, 0.99)';
+  msg.style.color = '#ffd900ff';
+  msg.style.padding = '16px 26px';
+  msg.style.borderRadius = '14px';
+  msg.style.fontSize = '20px';
+  msg.style.fontWeight = 'bold';
+  msg.style.zIndex = 99999;
+  msg.style.transition = 'all 0.35s ease';
+
+  msg.innerText = text;
+  document.body.appendChild(msg);
+
+  // anima entrada
+  setTimeout(() => {
+    msg.style.transform = 'translate(-50%, -50%) scale(1)';
+    msg.style.opacity = '1';
+  }, 50);
+
+  // anima saída
+  setTimeout(() => {
+    msg.style.transform = 'translate(-50%, -50%) scale(0.7)';
+    msg.style.opacity = '0';
+  }, duration);
+
+  // remove da tela
+  setTimeout(() => {
+    msg.remove();
+  }, duration + 400);
+}
+
+
+
+
 
 
 function showLevelMessage() {
