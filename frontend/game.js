@@ -44,6 +44,10 @@ function getDifficulty() {
 
 showAnimatedAlertTitle("Bem vindo ao JUMP QUIZ!", 3400);
 
+setTimeout(() => {
+  showAnimatedAlert("Acerte o bloco para começar a responder as questões", 3500);
+}, 3600);
+
 
 
 let game = new Phaser.Game(config);
