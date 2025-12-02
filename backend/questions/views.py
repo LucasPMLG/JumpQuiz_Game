@@ -17,19 +17,27 @@ QUESTIONS = {
     ],
 
     "medium": [
-        {"id": 3, "text": "O Gerenciamento de Problemas busca causa raiz.", "answer": True},
-        {"id": 4, "text": "O catálogo de serviços inclui apenas serviços externos.", "answer": False},
+        {"id": 6, "text": "O Gerenciamento de Problemas busca causa raiz.", "answer": True},
+        {"id": 7, "text": "O catálogo de serviços inclui apenas serviços externos.", "answer": False},
     ],
 
     "hard": [
-        {"id": 5, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
-        {"id": 6, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
+        {"id": 8, "text": "O SLA não faz parte do Gerenciamento de Nível de Serviço.", "answer": False},
+        {"id": 9, "text": "ITIL 4 é totalmente focado em processos lineares.", "answer": False},
     ]
 }
 
+# =============================================================
+#  CONTROLE GLOBAL (EVITA REPETIÇÃO)
+# =============================================================
+USED_QUESTIONS = {
+    "easy": set(),
+    "medium": set(),
+    "hard": set(),
+}
 
 # =============================================================
-#  RANDOM QUESTION (NÃO REPETE)
+#  RANDOM QUESTION (SEM REPETIÇÃO)
 # =============================================================
 @require_GET
 def random_question(request):
@@ -38,22 +46,21 @@ def random_question(request):
     if difficulty not in QUESTIONS:
         difficulty = "easy"
 
-    used = request.session.get(f"used_{difficulty}", [])
+    available = [
+        q for q in QUESTIONS[difficulty]
+        if q["id"] not in USED_QUESTIONS[difficulty]
+    ]
 
-    available = [q for q in QUESTIONS[difficulty] if q["id"] not in used]
-
+    # Se acabaram as perguntas, reseta automaticamente
     if not available:
-        request.session[f"used_{difficulty}"] = []
-        used = []
+        USED_QUESTIONS[difficulty].clear()
         available = QUESTIONS[difficulty].copy()
 
     q = random.choice(available)
 
-    used.append(q["id"])
-    request.session[f"used_{difficulty}"] = used
+    USED_QUESTIONS[difficulty].add(q["id"])
 
     return JsonResponse(q)
-
 
 # =============================================================
 #  SCORE SYSTEM
@@ -64,16 +71,24 @@ def submit_score(request):
     try:
         import json
         data = json.loads(request.body)
+
         name = data.get('name', 'Player')
         points = int(data.get('points', 0))
+
         s = Score.objects.create(player_name=name, points=points)
+
         return JsonResponse({'status': 'ok', 'id': s.id})
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
+# =============================================================
+#  TOP SCORES
+# =============================================================
 @require_GET
 def top_scores(request):
     scores = Score.objects.order_by('-points')[:20]
+
     data = [
         {
             'player_name': s.player_name,
@@ -82,4 +97,5 @@ def top_scores(request):
         }
         for s in scores
     ]
+
     return JsonResponse({'scores': data})

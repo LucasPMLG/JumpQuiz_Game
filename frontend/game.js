@@ -37,8 +37,8 @@ function preload() {
 }
 
 function getDifficulty() {
-  if (score < 200) return "easy";
-  if (score < 400) return "medium";
+  if (score < 100) return "easy";
+  if (score < 200) return "medium";
   return "hard";
 }
 
